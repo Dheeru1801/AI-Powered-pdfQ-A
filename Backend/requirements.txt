@@ -24,7 +24,7 @@ sentence-transformers==2.3.1
 huggingface_hub==0.20.3
 transformers==4.36.2
 torch==2.5.0    
-numpy==1.26.4  # ✅ Compatible with Python 3.13
+numpy==2.1.0  # ✅ Compatible with Python 3.13
 
 
 # LLM API
