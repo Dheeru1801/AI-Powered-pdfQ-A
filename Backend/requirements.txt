@@ -23,7 +23,7 @@ huggingface_hub==0.20.3
 transformers==4.36.2
 torch==2.5.0    
 numpy==1.26.4  # ✅ Compatible with Python 3.13
-scipy==1.10.1  # Still compatible
+scipy==1.11.4  # Still compatible
 
 # LLM API
 groq==0.4.1
