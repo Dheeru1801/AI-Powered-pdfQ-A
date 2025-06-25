@@ -34,7 +34,7 @@ groq==0.4.1
 requests==2.31.0
 
 # Data validation and serialization
-pydantic==2.5.0
+pydantic==2.20.1
 
 
 # Text processing utilities
