@@ -38,7 +38,7 @@ pydantic==2.5.0
 
 
 # Text processing utilities
-tokenizers==0.15.0
+tokenizers==0.15.1
 
 # Additional utilities
 typing-extensions==4.8.0
