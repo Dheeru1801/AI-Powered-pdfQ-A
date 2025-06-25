@@ -23,29 +23,22 @@ huggingface_hub==0.20.3
 transformers==4.36.2
 torch==2.5.0    
 numpy==1.26.4  # ✅ Compatible with Python 3.13
-scipy==1.11.4  # Still compatible
+
 
 # LLM API
 groq==0.4.1
 
 # HTTP requests and JSON handling
 requests==2.31.0
-httpx==0.25.2
 
 # Data validation and serialization
 pydantic==2.5.0
 
-# Development and debugging
-python-json-logger==2.0.7
 
 # Text processing utilities
-regex==2023.12.25
 tokenizers==0.15.0
 
 # Additional utilities
 typing-extensions==4.8.0
 urllib3==2.1.0
 
-# Build tools for source distributions
-setuptools>=68.0.0
-wheel>=0.41.0
