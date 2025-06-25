@@ -1,0 +1,50 @@
+# Core FastAPI dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+jinja2==3.1.2
+python-dotenv==1.0.1
+
+# CORS and middleware
+starlette==0.27.0
+
+# PDF processing
+PyPDF2==3.0.1
+
+# Supabase client and database
+supabase==2.0.3
+postgrest==0.13.2
+storage3==0.7.4
+
+# Vector database and embeddings
+pinecone[grpc]==4.1.0
+sentence-transformers==2.3.1
+huggingface_hub==0.20.3
+transformers==4.36.2
+torch==2.5.0    
+numpy==1.24.3
+scipy==1.11.4
+
+# LLM API
+groq==0.4.1
+
+# HTTP requests and JSON handling
+requests==2.31.0
+httpx==0.25.2
+
+# Data validation and serialization
+pydantic==2.5.0
+
+# Async support
+asyncio==3.4.3
+
+# Development and debugging
+python-json-logger==2.0.7
+
+# Text processing utilities
+regex==2023.12.25
+tokenizers==0.15.0
+
+# Additional utilities
+typing-extensions==4.8.0
+urllib3==2.1.0

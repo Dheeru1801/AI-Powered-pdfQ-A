@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background-color: #ffffff;
+    }
+
+    #root {
+        min-height: 100vh;
+    }
+}
+
+@layer components {
+    .chat-bubble-user {
+        @apply bg-blue-100 text-gray-900 rounded-2xl px-4 py-3 max-w-xs sm:max-w-md;
+    }
+
+    .chat-bubble-ai {
+        @apply bg-white text-gray-900 rounded-2xl px-4 py-3 max-w-xs sm:max-w-lg border shadow-sm;
+    }
+
+    .upload-button {
+        @apply bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200;
+    }
+
+    .send-button {
+        @apply bg-primary-500 hover:bg-primary-600 text-white rounded-lg px-4 py-2 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    }
+
+    /* Enhanced input styling */
+    .floating-input {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .floating-input:focus-within {
+        transform: translateY(-1px);
+    }
+
+    .floating-input textarea {
+        transition: height 0.15s ease-out;
+    }
+}
+
+@layer utilities {
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Touch-friendly targets for mobile */
+    .touch-target {
+        @apply min-h-[44px] min-w-[44px];
+    }
+
+    /* Mobile text improvements */
+    @media (max-width: 768px) {
+        /* Larger text on mobile for better readability */
+        .chat-bubble-user {
+            @apply text-base;
+        }
+        
+        .chat-bubble-ai {
+            @apply text-base;
+        }
+        
+        /* Mobile-friendly input sizes */
+        .mobile-input {
+            @apply text-base px-4 py-3;
+        }
+    }
+
+    /* Custom animations for sidebar */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Enhanced scrollbar styling */
+    .sidebar-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+        border-radius: 2px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(156, 163, 175, 0.5);
+    }
+
+    /* Hide scrollbar for textarea but keep functionality */
+    .scrollbar-hide-textarea {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }    .scrollbar-hide-textarea::-webkit-scrollbar {
+        display: none; /* Chrome, Safari and Opera */
+    }
+}
