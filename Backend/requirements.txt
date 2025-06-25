@@ -19,12 +19,12 @@ postgrest
 storage3
 
 # Vector database and embeddings
-pinecone[grpc]==4.1.0
-sentence-transformers==2.3.1
-huggingface_hub==0.20.3
-transformers==4.36.2
-torch==2.5.0    
-numpy==2.1.0  # ✅ Compatible with Python 3.13
+pinecone[grpc]
+sentence-transformers
+huggingface_hub
+transformers
+torch
+numpy==2.1.0  
 
 
 # LLM API
