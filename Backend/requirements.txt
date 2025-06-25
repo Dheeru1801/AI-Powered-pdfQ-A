@@ -14,9 +14,9 @@ starlette==0.27.0
 PyPDF2==3.0.1
 
 # Supabase client and database
-supabase==2.0.3
-postgrest==0.13.2
-storage3==0.7.4
+supabase
+postgrest
+storage3
 
 # Vector database and embeddings
 pinecone[grpc]==4.1.0
