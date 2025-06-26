@@ -23,7 +23,7 @@ pinecone-client[grpc]==2.2.2
 sentence-transformers==2.3.1
 huggingface_hub==0.22.2
 transformers==4.39.3
-torch==2.2.2
+torch==2.0.1
 numpy==2.1.0  
 
 # LLM API
