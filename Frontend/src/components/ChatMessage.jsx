@@ -19,7 +19,7 @@ const ChatMessage = ({
   const { displayedText, isTyping } = useTypewriter(
     message.content,
     shouldAnimate,
-    20 // Speed: 20ms per character
+    5 // Speed: 20ms per character
   );
   
   // Show animated text for newest AI message, normal text for others
