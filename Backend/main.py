@@ -53,7 +53,11 @@ app = FastAPI(
 # Configure CORS middleware for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://0.0.0.0:5173","https://ai-powered-pdf-q-a.vercel.app/"],  
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://0.0.0.0:5173",
+        "https://ai-powered-pdf-q-a.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,6 +101,15 @@ def get_supabase() -> Client:
 # ================================
 # API ENDPOINTS
 # ================================
+
+@app.get("/")
+def read_root():
+    return {"message": "PDF RAG Q&A Backend is running"}
+
+
+
+
+
 
 @app.post("/uploadpdf/")
 async def upload_pdf(
