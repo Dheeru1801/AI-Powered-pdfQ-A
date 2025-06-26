@@ -19,7 +19,7 @@ postgrest-py==0.10.6
 storage3==0.5.1
 
 # Vector database and embeddings
-pinecone-client[grpc]==3.0.2
+pinecone-client[grpc]==2.2.2
 sentence-transformers==2.2.2
 huggingface_hub==0.22.2
 transformers==4.39.3
