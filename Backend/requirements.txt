@@ -16,7 +16,6 @@ PyPDF2==3.0.1
 # Supabase client and database (pinned versions)
 supabase==1.0.3
 postgrest-py==0.10.6
-storage3==0.5.1
 
 # Vector database and embeddings
 pinecone-client[grpc]==2.2.2
