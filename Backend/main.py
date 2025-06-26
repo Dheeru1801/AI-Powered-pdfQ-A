@@ -53,7 +53,7 @@ app = FastAPI(
 # Configure CORS middleware for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://0.0.0.0:5173"],  # Vite dev server URLs
+    allow_origins=["http://localhost:5173", "http://0.0.0.0:5173","https://ai-powered-pdf-q-a.vercel.app/"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
