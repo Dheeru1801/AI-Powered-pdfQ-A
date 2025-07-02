@@ -12,16 +12,11 @@ The RAG system follows these steps:
 3. Context Assembly: Combine retrieved chunks with source information
 4. Answer Generation: Use Groq LLM to generate contextual responses
 
-Key Features:
-- File-specific search filtering for targeted queries
-- Source citation and confidence scoring
-- Optimized prompt engineering for accurate responses
-- Error handling and graceful degradation
-
 """
 
 import os
 from typing import Dict, List, Any
+import warnings
 from dotenv import load_dotenv
 from groq import Groq
 from pinecone import Pinecone
@@ -30,18 +25,13 @@ from sentence_transformers import SentenceTransformer
 # Load environment variables from .env file
 load_dotenv()
 
+# Suppress transformers warnings about deprecated PyTorch functions
+warnings.filterwarnings("ignore", message=".*torch.utils._pytree._register_pytree_node.*", category=FutureWarning)
+
+
+
+"""Purpose: Sets up all the components needed for RAG:"""
 class SimpleRAG:
-    """
-    Simple RAG (Retrieval-Augmented Generation) System
-    
-    A complete implementation of RAG for PDF document Q&A that combines:
-    - Semantic search using Pinecone vector database
-    - BGE embeddings for high-quality text representation
-    - Groq's fast LLM inference for answer generation
-    
-    This class handles the entire RAG pipeline from query processing to
-    answer generation, with support for document filtering and source citation.
-    """
     
     def __init__(self):
         # Initialize Groq LLM client
@@ -59,12 +49,15 @@ class SimpleRAG:
             raise ValueError("PINECONE_DEFAULT_API_KEY environment variable is not set")
         if not self.index_name:
             raise ValueError("PINECONE_INDEX_NAME environment variable is not set")
-              # Connect to Pinecone index
+        
+        # Connect to Pinecone index
         pc = Pinecone(api_key=self.pinecone_api_key)
         self.index = pc.Index(self.index_name)
         
         # Initialize BGE embedding model (must match the model used for vectorization)
         self.embedding_model = SentenceTransformer('BAAI/bge-small-en-v1.5')
+
+
     
     def prepare_query(self, query: str) -> str:
         """
@@ -76,11 +69,15 @@ class SimpleRAG:
         """
         return f"Represent this sentence for searching relevant passages: {query}"
     
+
+    
+    
     def retrieve_documents(self, query: str, top_k: int = 3, filename_filter: str = None) -> List[Dict]:
         """
-        Retrieve relevant document chunks from Pinecone vector database.
-        
-        Converts user query to vector representation and searches the Pinecone
+            Converts user question to vector embedding
+            Searches Pinecone for similar document chunks
+            Optionally filters by specific filename
+            Returns most relevant text chunks with metadata
         """
         try:
             # Convert query to vector embedding using BGE model
@@ -117,6 +114,9 @@ class SimpleRAG:
             return []
     
 
+    # ---------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
+    # GENERATION PART OF LLM
     def generate_answer(self, query: str, documents: List[Dict]) -> str:
         """
         Generate contextual answer using Groq LLM and retrieved documents.
@@ -130,29 +130,33 @@ class SimpleRAG:
             context = "\n\n".join([
                 f"Document: {doc['filename']}\nContent: {doc['text']}"
                 for doc in documents
-            ])            # Crafted optimized prompt for RAG question answering with detailed formatting
+            ])     
+            
+            
+            # Crafted optimized prompt for RAG question answering with detailed formatting
             prompt = f"""Based on the following context from uploaded documents, please answer the question in a comprehensive and well-structured format.
 
-Context:
-{context}
+            Context:
+            {context}
 
-Question: {query}
+            Question: {query}
 
-CRITICAL FORMATTING REQUIREMENTS:
-- Break your response into multiple short paragraphs (2-4 sentences each)
-- Add TWO line breaks (\\n\\n) between different paragraphs
-- Use bullet points (•) or numbered lists (1., 2., 3.) when listing multiple items
-- Add blank lines before and after bullet point lists
-- Use clear section headers when discussing different aspects
-- Start each new topic or section with a line break
+            CRITICAL FORMATTING REQUIREMENTS:
+            - Break your response into multiple short paragraphs (2-4 sentences each)
+            - Add TWO line breaks (\\n\\n) between different paragraphs
+            - Use bullet points (•) or numbered lists (1., 2., 3.) when listing multiple items
+            - Add blank lines before and after bullet point lists
+            - Use clear section headers when discussing different aspects
+            - Start each new topic or section with a line break
 
-CONTENT REQUIREMENTS:
-- Provide detailed explanations with specific examples from the documents
-- Include relevant details, numbers, dates, and names mentioned in the context
-- Organize information logically with clear flow between topics
-- If discussing multiple aspects, address each one separately with proper spacing
+            CONTENT REQUIREMENTS:
+            - Provide detailed explanations with specific examples from the documents
+            - Include relevant details, numbers, dates, and names mentioned in the context
+            - Organize information logically with clear flow between topics
+            - If discussing multiple aspects, address each one separately with proper spacing
 
-Please provide a detailed, well-formatted response with clear paragraph breaks and proper line spacing:"""# Generate response using Groq's Llama model with system instruction
+            Please provide a detailed, well-formatted response with clear paragraph breaks and proper line spacing:"""
+            
             chat_completion = self.groq_client.chat.completions.create(
                 messages=[                    {
                         "role": "system",
@@ -164,7 +168,7 @@ Please provide a detailed, well-formatted response with clear paragraph breaks a
                     }
                 ],
                 model="llama3-70b-8192",    # High-performance Llama model
-                max_tokens=3000,            # High token limit for very detailed responses
+                max_tokens=3000,
                 temperature=0.2             # Slightly higher temperature for more natural formatting
             )
             
@@ -173,6 +177,9 @@ Please provide a detailed, well-formatted response with clear paragraph breaks a
         except Exception as e:
             print(f"Error generating answer: {str(e)}")
             return f"Sorry, I encountered an error while generating the answer: {str(e)}"
+
+
+
 
 # ============================
 # GLOBAL RAG INSTANCE MANAGEMENT
@@ -195,9 +202,14 @@ def get_rag_system():
         rag_system = SimpleRAG()
     return rag_system
 
+
+
+
 # ============================
 # PUBLIC API FUNCTIONS
 # ============================
+
+
 
 def ask_question(question: str, filename: str = None) -> Dict[str, Any]:
     """
@@ -207,20 +219,7 @@ def ask_question(question: str, filename: str = None) -> Dict[str, Any]:
     1. Retrieve relevant document chunks
     2. Generate contextual answers
     3. Format response with sources
-    
-    Args:        question (str): User's question about the documents
-        filename (str, optional): Limit search to specific document
-        
-    Returns:
-        Dict[str, Any]: Response containing:
-            - answer (str): Generated answer from the RAG system
-            - sources (List[Dict]): Source documents with metadata and scores
-            
-    Example:
-        >>> result = ask_question("What is machine learning?", "ai_textbook.pdf")
-        >>> print(result['answer'])
-        >>> for source in result['sources']:
-        ...     print(f"Source: {source['filename']} (Score: {source['score']})")    """
+    """
     try:
         # Get RAG system instance
         rag = get_rag_system()

@@ -1,5 +1,5 @@
 """
-LlamaIndex RAG Implementation for PDF Q&A System
+--LlamaIndex RAG Implementation for PDF Q&A System--
 
 This module provides an alternative RAG implementation using LlamaIndex framework
 with Groq LLM and Pinecone vector database. LlamaIndex offers high-level abstractions
@@ -15,8 +15,6 @@ Key Features:
 This implementation can be used as an alternative to the simple_rag.py module
 for scenarios requiring more advanced RAG features.
 
-Author: PDF RAG System
-Date: 2024
 """
 
 import os

@@ -5,20 +5,6 @@ This module handles the creation and storage of vector embeddings for PDF docume
 using sentence transformers and Pinecone vector database. It provides functionality
 for text chunking, embedding generation, and vector storage for semantic search.
 
-Key Features:
-- Document text chunking with overlap for better context preservation
-- BGE (BAAI General Embedding) model for high-quality embeddings
-- Pinecone integration for scalable vector storage
-- Batch processing for efficient embedding operations
-- Configurable chunk sizes and overlap parameters
-
-Dependencies:
-- sentence-transformers: For generating text embeddings
-- pinecone-client: For vector database operations
-- python-dotenv: For environment variable management
-
-Author: PDF RAG System
-Date: 2024
 """
 
 import os
@@ -28,7 +14,7 @@ from typing import List, Dict, Any
 from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
 
-# Load environment variables from .env file
+
 load_dotenv()
 
 # Get Pinecone configuration from environment variables
@@ -46,16 +32,6 @@ pc = Pinecone(api_key=PINECONE_API_KEY)
 def init_pinecone():
     """
     Initialize or connect to a Pinecone vector database index.
-    
-    Creates a new serverless Pinecone index if it doesn't exist, or connects
-    to the existing index. The index is configured for cosine similarity with
-    384 dimensions to match the BGE embedding model output.
-    
-    Returns:
-        pinecone.Index: Connected Pinecone index object for vector operations
-        
-    Raises:
-        Exception: If Pinecone initialization fails due to API issues or configuration
     """
     try:
         # Check if index already exists in the Pinecone environment
@@ -85,24 +61,21 @@ def init_pinecone():
         print(f"Error initializing Pinecone: {str(e)}")
         raise
 
+
+
 # Initialize BGE (BAAI General Embedding) model for high-quality embeddings
 # BGE models are optimized for retrieval tasks and multilingual support
-model = SentenceTransformer('BAAI/bge-small-en-v1.5')  # Small, efficient English model
+model = SentenceTransformer('BAAI/bge-small-en-v1.5')  
 
 def prepare_query(query: str) -> str:
     """
     Prepare query text for BGE embedding model.
-    
     BGE models benefit from specific query prefixes that help the model
     understand the task context and generate better embeddings for retrieval.
-    
-    Args:
-        query (str): Raw user query text
-        
-    Returns:
-        str: Formatted query with BGE-specific prefix for optimal embedding
     """
     return f"Represent this sentence for searching relevant passages: {query}"
+
+
 
 def chunk_text(text: str, max_chunk_size: int = 1000, overlap: int = 100) -> List[str]:
     """
@@ -111,19 +84,6 @@ def chunk_text(text: str, max_chunk_size: int = 1000, overlap: int = 100) -> Lis
     Breaks down large documents into manageable chunks while preserving context
     through overlapping segments. This approach ensures that important information
     isn't lost at chunk boundaries and improves retrieval accuracy.
-    
-    Args:
-        text (str): Input text to be chunked
-        max_chunk_size (int): Maximum character count per chunk (default: 1000)
-        overlap (int): Number of characters to overlap between chunks (default: 100)
-        
-    Returns:
-        List[str]: List of text chunks with preserved context overlap
-        
-    Note:
-        - Splits text at sentence boundaries to maintain semantic coherence
-        - Preserves overlap from previous chunks for context continuity
-        - Handles edge cases for very short texts or sentences longer than max_chunk_size
     """
     # Split text into sentences using common sentence-ending punctuation
     import re
@@ -174,19 +134,6 @@ def embed_and_store(text_content: List[str], metadata: Dict[str, Any]):
     Takes extracted text from PDF pages, combines them with page context,
     chunks the content appropriately, generates embeddings using BGE model,
     and stores the resulting vectors in Pinecone for semantic search.
-    
-    Args:
-        text_content (List[str]): List of text strings, one per PDF page
-        metadata (Dict[str, Any]): Document metadata including filename, upload info
-        
-    Returns:
-        Dict[str, Any]: Processing result containing:
-            - success (bool): Whether the operation completed successfully
-            - vectors_created (int): Number of vectors generated and stored
-            - filename (str): Original filename for reference
-            
-    Raises:
-        Exception: If embedding generation or Pinecone storage fails
         
     Process Flow:
         1. Initialize Pinecone connection
