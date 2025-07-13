@@ -17,8 +17,15 @@ Dependencies:
 
 """
 
-# Standard library imports
+# Fix OpenMP library conflict before importing ML libraries
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+# Fix HuggingFace compatibility issues
+os.environ["TRANSFORMERS_OFFLINE"] = "0"
+os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+
+# Standard library imports
 import io
 from datetime import datetime
 from typing import List, Optional, Dict, Any
@@ -129,7 +136,7 @@ async def upload_pdf(
     if not file.filename.endswith('.pdf'):
         raise HTTPException(
             status_code=400, 
-            detail="❌ Only PDF files are allowed. Please upload a .pdf file."
+            detail=" Only PDF files are allowed. Please upload a .pdf file."
         )
     
     filename = file.filename
@@ -140,7 +147,7 @@ async def upload_pdf(
     if existing_doc:
         raise HTTPException(
             status_code=400, 
-            detail=f"❌ Document '{filename}' already exists in the system."
+            detail=f" Document '{filename}' already exists in the system."
         )
     """Ensure storage bucket exists (create if needed)"""
     try:
@@ -157,7 +164,7 @@ async def upload_pdf(
     except Exception as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"❌ Error managing storage bucket: {str(e)}"
+            detail=f" Error managing storage bucket: {str(e)}"
         )
     
     """Upload file to Supabase Storage"""
@@ -180,7 +187,7 @@ async def upload_pdf(
         return {
             "filename": filename,
             "status": "success",
-            "message": f"✅ PDF '{filename}' uploaded successfully", "url": file_url,
+            "message": f" PDF '{filename}' uploaded successfully", "url": file_url,
             "document_id": doc_record["id"],
             "database_status": doc_record["status"],
             "file_size_bytes": file_size
@@ -191,7 +198,7 @@ async def upload_pdf(
         traceback.print_exc()
         raise HTTPException(
             status_code=500,
-            detail=f"❌ Upload failed: {str(e)}"
+            detail=f" Upload failed: {str(e)}"
         )
 
 
@@ -249,6 +256,7 @@ async def list_files_json(limit: int = 10, search: str = None):
 """
     Extract text from a PDF file stored in Supabase Storage
 """
+
 @app.get("/extract/{filename}")
 async def extract_pdf_text(filename: str, supabase: Client = Depends(get_supabase)):
     
@@ -259,8 +267,30 @@ async def extract_pdf_text(filename: str, supabase: Client = Depends(get_supabas
         raise HTTPException(status_code=404, detail=f"Document '{filename}' not found in database")
     
     try:
-        # Use helper function to extract text content
-        text_content = await extract_pdf_text_from_storage(filename, supabase)
+        # Download file data from Supabase Storage directly into memory
+        try:
+            file_data = supabase.storage.from_(BUCKET_NAME).download(filename)
+        except Exception as e:
+            raise HTTPException(
+                status_code=404,
+                detail=f"File '{filename}' not found in storage: {str(e)}"
+            )
+        
+        # Extract text from the PDF data in memory
+        try:
+            file_stream = io.BytesIO(file_data)
+            pdf_reader = PdfReader(file_stream)
+            
+            text_content = []
+            for page_num in range(len(pdf_reader.pages)):
+                page = pdf_reader.pages[page_num]
+                text_content.append(page.extract_text())
+                
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error extracting text from PDF: {str(e)}"
+            )
         
         return {
             "filename": filename,
@@ -283,7 +313,6 @@ async def extract_pdf_text(filename: str, supabase: Client = Depends(get_supabas
 
 
 
-
 """
     Extract text from a PDF in Supabase Storage, vectorize it using BGE model, and store in Pinecone
 """
@@ -298,7 +327,7 @@ async def vectorize_pdf(
         # Update status to processing
         doc_manager.update_document_status(filename, "processing")
         
-        # Use extract endpoint logic to get text content
+        # Use extract endpoint to get text content
         try:
             extract_result = await extract_pdf_text(filename, supabase)
             text_content = extract_result["text_content"]
@@ -380,53 +409,53 @@ async def vectorize_pdf(
 
 
 
-@app.get("/search/")
-async def search_documents(
-    query: str,
-    top_k: int = 5
-):
-    """
-    Search for documents similar to the query using BAAI embeddings
-    """
-    try:
-        # Import from the vector embedding module
-        from vector_embedding import model, init_pinecone, prepare_query
+# @app.get("/search/")
+# async def search_documents(
+#     query: str,
+#     top_k: int = 5
+# ):
+#     """
+#     Search for documents similar to the query using BAAI embeddings
+#     """
+#     try:
+#         # Import from the vector embedding module
+#         from vector_embedding import model, init_pinecone, prepare_query
         
-        # Generate embedding for the query with proper prefix for BGE models
-        prepared_query = prepare_query(query)
-        query_embedding = model.encode(prepared_query).tolist()
+#         # Generate embedding for the query with proper prefix for BGE models
+#         prepared_query = prepare_query(query)
+#         query_embedding = model.encode(prepared_query).tolist()
         
-        # Initialize Pinecone and search
-        index = init_pinecone()
+#         # Initialize Pinecone and search
+#         index = init_pinecone()
         
-        # Search for similar vectors
-        search_results = index.query(
-            vector=query_embedding,
-            top_k=top_k,
-            include_metadata=True
-        )
+#         # Search for similar vectors
+#         search_results = index.query(
+#             vector=query_embedding,
+#             top_k=top_k,
+#             include_metadata=True
+#         )
         
-        # Format results
-        results = []
-        for match in search_results['matches']:
-            results.append({
-                "score": match['score'],
-                "filename": match['metadata']['filename'],
-                "text_snippet": match['metadata']['text_snippet'],
-                "source_url": match['metadata'].get('source_url', ''),
-                "page_count": match['metadata'].get('page_count', 0)
-            })
-          # Return results as JSON
-        return {
-            "query": query,
-            "results": results,
-            "total_results": len(results)
-        }
+#         # Format results
+#         results = []
+#         for match in search_results['matches']:
+#             results.append({
+#                 "score": match['score'],
+#                 "filename": match['metadata']['filename'],
+#                 "text_snippet": match['metadata']['text_snippet'],
+#                 "source_url": match['metadata'].get('source_url', ''),
+#                 "page_count": match['metadata'].get('page_count', 0)
+#             })
+#           # Return results as JSON
+#         return {
+#             "query": query,
+#             "results": results,
+#             "total_results": len(results)
+#         }
         
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error during search: {str(e)}"        )
+#     except Exception as e:
+#         raise HTTPException(
+#             status_code=500,
+#             detail=f"Error during search: {str(e)}"        )
 
 
 
@@ -465,38 +494,6 @@ async def ask_question_api(question: Dict[str, str]):
 # ------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------
 
-
-# Helper function to extract text from PDF in Supabase Storage
-async def extract_pdf_text_from_storage(filename: str, supabase: Client) -> list:
-    """
-    Download PDF from Supabase Storage and extract text content
-    """
-    try:
-        # Download file data from Supabase Storage directly into memory
-        file_data = supabase.storage.from_(BUCKET_NAME).download(filename)
-    except Exception as e:
-        raise HTTPException(
-            status_code=404,
-            detail=f"File '{filename}' not found in storage: {str(e)}"
-        )
-    
-    try:
-        # Extract text from the PDF data in memory
-        file_stream = io.BytesIO(file_data)
-        pdf_reader = PdfReader(file_stream)
-        
-        text_content = []
-        for page_num in range(len(pdf_reader.pages)):
-            page = pdf_reader.pages[page_num]
-            text_content.append(page.extract_text())
-            
-        return text_content
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error extracting text from PDF: {str(e)}"
-        )
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

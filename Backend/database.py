@@ -5,15 +5,6 @@ This module provides database operations for managing PDF documents and their me
 using Supabase as the backend database. It handles document lifecycle management
 including upload, processing status updates, and retrieval operations.
 
-Key Features:
-- Document record management in Supabase
-- Status tracking (uploaded, processing, vectorized, error)
-- File metadata storage and retrieval
-- Document statistics and analytics
-- Comprehensive error handling
-
-Author: PDF RAG System
-Date: 2024
 """
 
 import os
@@ -147,11 +138,6 @@ class DocumentManager:
         Fetches complete document metadata from the database for a specific filename.
         Used for checking document existence and retrieving metadata before operations.
         
-        Args:
-            filename (str): Document filename to search for
-            
-        Returns:
-            Optional[Dict[str, Any]]: Document record if found, None otherwise
         """
         try:
             result = self.supabase.table("documents").select("*").eq("filename", filename).execute()
@@ -172,11 +158,6 @@ class DocumentManager:
         Retrieves all document records from the database, optionally filtered by status.
         Results are ordered by upload date (most recent first) for better UX.
         
-        Args:
-            status (Optional[str]): Filter by document status if provided
-            
-        Returns:
-            List[Dict[str, Any]]: List of document records matching criteria
         """
         try:
             # Build query with optional status filter
@@ -199,9 +180,7 @@ class DocumentManager:
         Convenience method to retrieve documents that are ready for Q&A operations.
         These documents have completed the vectorization process and are available
         for semantic search and question answering.
-        
-        Returns:
-            List[Dict[str, Any]]: List of vectorized document records        """
+        """
         return self.list_documents(status="vectorized")
     
     def get_statistics(self) -> Dict[str, Any]:

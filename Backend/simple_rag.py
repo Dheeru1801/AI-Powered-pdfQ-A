@@ -235,8 +235,11 @@ def ask_question(question: str, filename: str = None) -> Dict[str, Any]:
                 "sources": []
             }
           # Generate contextual answer using retrieved documents
+        
+        
         answer = rag.generate_answer(question, documents)
-          # Format source information for response
+          
+        # Format source information for response
         sources = []
         for doc in documents:
             source_info = {

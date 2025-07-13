@@ -67,13 +67,13 @@ def init_pinecone():
 # BGE models are optimized for retrieval tasks and multilingual support
 model = SentenceTransformer('BAAI/bge-small-en-v1.5')  
 
-def prepare_query(query: str) -> str:
-    """
-    Prepare query text for BGE embedding model.
-    BGE models benefit from specific query prefixes that help the model
-    understand the task context and generate better embeddings for retrieval.
-    """
-    return f"Represent this sentence for searching relevant passages: {query}"
+# def prepare_query(query: str) -> str:
+#     """
+#     Prepare query text for BGE embedding model.
+#     BGE models benefit from specific query prefixes that help the model
+#     understand the task context and generate better embeddings for retrieval.
+#     """
+#     return f"Represent this sentence for searching relevant passages: {query}"
 
 
 
@@ -82,8 +82,7 @@ def chunk_text(text: str, max_chunk_size: int = 1000, overlap: int = 100) -> Lis
     Split long text into smaller, overlapping chunks for better embedding quality.
     
     Breaks down large documents into manageable chunks while preserving context
-    through overlapping segments. This approach ensures that important information
-    isn't lost at chunk boundaries and improves retrieval accuracy.
+    through overlapping segments. 
     """
     # Split text into sentences using common sentence-ending punctuation
     import re
@@ -134,14 +133,7 @@ def embed_and_store(text_content: List[str], metadata: Dict[str, Any]):
     Takes extracted text from PDF pages, combines them with page context,
     chunks the content appropriately, generates embeddings using BGE model,
     and stores the resulting vectors in Pinecone for semantic search.
-        
-    Process Flow:
-        1. Initialize Pinecone connection
-        2. Combine pages with page number context
-        3. Split into overlapping chunks
-        4. Generate embeddings for each chunk
-        5. Store vectors in Pinecone with metadata
-        6. Return processing summary
+    
     """
     try:
         # Initialize Pinecone index connection
